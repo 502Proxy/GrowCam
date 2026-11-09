@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Neuer Grow · GrowCam{% endblock %}
+{% block content %}
+<section class="panel wizard">
+  {% include "_steps.html" %}
+  <form method="post" action="/neu" class="stack" style="gap: 1.1rem">
+    <input type="hidden" name="name" value="{{ name }}">
+    <input type="hidden" name="sow_date" value="{{ sow_date }}">
+    {% if seed.name %}
+    <div>
+      <h2 style="font-size: 1.75rem">{{ seed.name }}</h2>
+      <p class="muted">Diese Infos wurden im Internet gefunden. Du kannst sie korrigieren.</p>
+    </div>
+    {% else %}
+    <p class="muted">Trag ein, was du über die Sorte weißt. Alles außer dem Namen ist freiwillig.</p>
+    {% endif %}
+
+    <label class="field">Name der Sorte
+      <input class="input" name="seed_name" value="{{ seed.name }}" placeholder="z. B. Northern Lights Auto">
+    </label>
+    <label class="field">Typ
+      <select class="input" name="seed_type">
+        {% for t in seed_types %}<option value="{{ t.value }}" {{ 'selected' if t == seed.seed_type }}>{{ {"autoflower": "Autoflower – blüht von selbst", "photoperiod": "Photoperiodisch – Licht muss umgestellt werden", "unknown": "Weiß ich nicht"}[t.value] }}</option>{% endfor %}
+      </select>
+    </label>
+    <div class="grid-auto">
+      <label class="field">Wochen bis Ernte
+        <input class="input" type="number" min="1" max="40" name="weeks_to_harvest" value="{{ seed.weeks_to_harvest or '' }}">
+      </label>
+      <label class="field">Blütezeit (Wochen)
+        <input class="input" type="number" min="1" max="20" name="flowering_weeks" value="{{ seed.flowering_weeks or '' }}">
+      </label>
+    </div>
+    <label class="field">Höhe im Zelt
+      <input class="input" name="height" value="{{ seed.height }}">
+    </label>
+    <label class="field">Licht
+      <input class="input" name="light_schedule" value="{{ seed.light_schedule }}">
+    </label>
+    <label class="field">Schwierigkeit
+      <input class="input" name="difficulty" value="{{ seed.difficulty }}">
+    </label>
+
+    <div class="row between">
+      <span style="font-size: 1.3rem; font-weight: 700" id="plants-label">Wie viele Pflanzen?</span>
+      <div class="stepper">
+        <button type="button" class="btn" aria-label="Eine Pflanze weniger" onclick="const o=this.nextElementSibling;o.value=Math.max(1,+o.value-1);o.nextElementSibling.nextElementSibling.value=o.value">−</button>
+        <output aria-live="polite" aria-labelledby="plants-label">1</output>
+        <button type="button" class="btn" aria-label="Eine Pflanze mehr" onclick="const o=this.previousElementSibling;o.value=Math.min(20,+o.value+1);this.nextElementSibling.value=o.value">+</button>
+        <input type="hidden" name="plants" value="1">
+      </div>
+    </div>
+
+    <p class="box info">Die KI nutzt diese Infos, um z. B. die Blüte richtig einzuschätzen.</p>
+    <div class="row between">
+      <a class="btn" href="/neu/samen?{{ {'name': name, 'date': sow_date, 'q': query} | urlencode }}">Andere Sorte</a>
+      <button class="btn primary">Grow starten</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de" style="font-size: {{ font_scale }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}GrowCam{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', path='style.css') }}?v={{ version }}">
+<script src="{{ url_for('static', path='app.js') }}?v={{ version }}" defer></script>
+</head>
+<body>
+<div class="page">
+
+<header class="header">
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8FD694" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></svg>
+    <div>
+      <h1>GrowCam</h1>
+      {% if grow %}
+      <p class="muted">{{ grow.name }} · {{ grow.phase().value }} · Tag {{ grow.day_count(today) }}</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="font-switch" role="group" aria-label="Schriftgröße">
+    <span class="muted small">Schrift</span>
+    {% for key, label, aria in [("normal", "A", "Normale Schrift"), ("gross", "A+", "Große Schrift"), ("sehr-gross", "A++", "Sehr große Schrift")] %}
+    <form method="post" action="/schrift/{{ key }}">
+      <button class="btn small-btn" aria-label="{{ aria }}" aria-pressed="{{ 'true' if font_size == key else 'false' }}">{{ label }}</button>
+    </form>
+    {% endfor %}
+  </div>
+</header>
+
+<nav class="nav" aria-label="Bereiche">
+  {% for key, href, label in [("start", "/", "Start"), ("kamera", "/kamera", "Kamera"), ("tagebuch", "/tagebuch", "Tagebuch"), ("archiv", "/archiv", "Archiv"), ("einstellungen", "/einstellungen", "Einstellungen")] %}
+  <a href="{{ href }}" {% if tab == key %}aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+
+{% if msg %}<p class="box ok" role="status">{{ msg }}</p>{% endif %}
+{% if err %}<p class="box warn" role="alert">{{ err }}</p>{% endif %}
+
+{% block content %}{% endblock %}
+
+{% if settings.demo_camera or settings.demo_ai %}
+<p class="muted small">Demo-Modus:
+  {% if settings.demo_camera %}keine Kamera eingerichtet{% endif %}{% if settings.demo_camera and settings.demo_ai %}, {% endif %}
+  {% if settings.demo_ai %}keine KI eingerichtet (Beispiel-Antworten){% endif %}.
+  Siehe Einstellungen.</p>
+{% endif %}
+</div>
+</body>
+</html>

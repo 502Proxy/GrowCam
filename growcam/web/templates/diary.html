@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Tagebuch · GrowCam{% endblock %}
+{% block content %}
+<div class="split">
+  <section class="panel main">
+    <div class="row between">
+      <div>
+        <h2>So weit sind die Pflanzen</h2>
+        <p class="muted">{{ grow.name }}{% if grow.seed %} · {{ grow.seed.name }}{% endif %} · {{ grow.plant_count }} Pflanze{{ 'n' if grow.plant_count != 1 }}</p>
+      </div>
+      <a class="btn outline-green small-btn" href="/neu">Neuen Grow starten</a>
+    </div>
+    <ol class="timeline">
+      {% for m in milestones %}
+      <li>
+        <div class="rail"><span class="dot {{ m.dot }}"></span><span class="line"></span></div>
+        <div class="body">
+          <h3>{{ m.title }}</h3>
+          <span>{{ m.date_text }}</span>
+          <span class="chip {{ m.tone }}">{{ m.source }}</span>
+          {% if m.dot == "pending" %}
+          <div class="row" style="margin-top: 0.4rem">
+            <form method="post" action="/meilenstein/{{ m.kind }}/confirm?next=/tagebuch" class="inline"><button class="btn primary small-btn">Ja, stimmt</button></form>
+            <form method="post" action="/meilenstein/{{ m.kind }}/reject?next=/tagebuch" class="inline"><button class="btn small-btn">Noch nicht</button></form>
+          </div>
+          {% elif m.dot == "open" and m.kind != "harvest" %}
+          <form method="post" action="/meilenstein/{{ m.kind }}/confirm?next=/tagebuch" class="inline" style="margin-top: 0.4rem">
+            <button class="btn small-btn">Ist schon so weit</button>
+          </form>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    <form method="post" action="/grow/beenden" class="inline" onsubmit="return confirm('Grow wirklich beenden und ins Archiv legen?')">
+      <button class="btn small-btn">Geerntet – Grow beenden</button>
+    </form>
+  </section>
+
+  <section class="panel side">
+    <h2>Was wurde gemacht?</h2>
+    <div class="grid-auto" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+      {% for kind in quick %}
+      <form method="post" action="/tagebuch/eintrag" class="inline">
+        <input type="hidden" name="kind" value="{{ kind.value }}">
+        <button class="btn" style="width: 100%; background: var(--panel-2)">{{ kind.label }}</button>
+      </form>
+      {% endfor %}
+    </div>
+    <form method="post" action="/tagebuch/eintrag" class="stack" style="gap: 0.6rem">
+      <input type="hidden" name="kind" value="note">
+      <label class="field" style="font-size: 1.1rem">Notiz
+        <input class="input" name="text" required placeholder="z. B. Lampe höher gehängt">
+      </label>
+      <button class="btn">Notiz speichern</button>
+    </form>
+    <p class="muted small">Datum und Uhrzeit werden automatisch eingetragen.</p>
+    <ul class="entries">
+      {% for e in entries %}
+      <li>
+        <div>
+          <strong>{{ e.kind.label }}</strong>{% if e.text %}<br><span class="muted">{{ e.text }}</span>{% endif %}
+        </div>
+        <div class="row">
+          <span class="muted small">{{ e.created_at | short }}, {{ e.created_at | time }}</span>
+          <form method="post" action="/tagebuch/eintrag/{{ e.id }}/loeschen" class="inline">
+            <button class="btn small-btn" aria-label="Eintrag {{ e.kind.label }} löschen" style="min-height: 2.75rem; padding: 0 0.75rem">✕</button>
+          </form>
+        </div>
+      </li>
+      {% else %}
+      <li class="muted">Noch keine Einträge.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

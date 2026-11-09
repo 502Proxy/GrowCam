@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Neuer Grow · GrowCam{% endblock %}
+{% block content %}
+<section class="panel wizard">
+  {% include "_steps.html" %}
+  <form method="get" action="/neu/samen" class="stack" style="gap: 1.25rem">
+    <label class="field">Wie soll der Grow heißen?
+      <input class="input" name="name" value="{{ name }}" placeholder="z. B. Winter 2026" required>
+    </label>
+    <label class="field">Wann kommen die Samen in die Erde?
+      <input class="input" type="date" name="date" value="{{ sow_date.isoformat() }}" required style="max-width: 18rem">
+    </label>
+    {% if grow %}
+    <p class="box info">Der laufende Grow „{{ grow.name }}“ wird mit allen Bildern und Berichten ins Archiv verschoben.</p>
+    {% endif %}
+    <div class="row between">
+      <a class="btn" href="/">Abbrechen</a>
+      <button class="btn primary">Weiter</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
