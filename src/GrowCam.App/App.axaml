@@ -171,13 +171,15 @@
       <Setter Property="BorderBrush" Value="#4A5A50" />
       <Setter Property="Background" Value="#0F1412" />
       <Setter Property="Foreground" Value="#F2F6F3" />
-      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
+    <!-- Content alignment is not defined on the shared base class, so set it per control. -->
     <Style Selector="TextBox">
       <Setter Property="Padding" Value="14,0" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="ComboBox">
       <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="CheckBox">
       <Setter Property="FontSize" Value="20" />
