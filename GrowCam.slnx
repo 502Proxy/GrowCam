@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GrowCam.Domain/GrowCam.Domain.csproj" />
+    <Project Path="src/GrowCam.Application/GrowCam.Application.csproj" />
+    <Project Path="src/GrowCam.Infrastructure/GrowCam.Infrastructure.csproj" />
+    <Project Path="src/GrowCam.App/GrowCam.App.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GrowCam.Tests/GrowCam.Tests.csproj" />
+  </Folder>
+</Solution>

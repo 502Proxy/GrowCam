@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             xmlns:sys="using:System"
+             x:Class="GrowCam.App.Views.ReportView"
+             x:DataType="vm:ReportViewModel">
+  <StackPanel Spacing="20">
+    <Button Classes="small" HorizontalAlignment="Left" Content="← Zurück zum Start" Command="{Binding BackCommand}" />
+
+    <Border Classes="panel">
+      <StackPanel Spacing="10">
+        <Border Classes="chip" Background="{Binding Label.Background}" BorderBrush="{Binding Label.BorderBrush}">
+          <TextBlock Foreground="{Binding Label.Foreground}" Text="{Binding Label.Text}" />
+        </Border>
+        <TextBlock FontSize="30" FontWeight="Bold" Text="{Binding Headline}" />
+        <TextBlock Classes="muted" Text="{Binding Range}" />
+      </StackPanel>
+    </Border>
+
+    <Border Classes="panel" IsVisible="{Binding HasPhotos}">
+      <StackPanel Spacing="12">
+        <TextBlock Classes="h3" Text="Die Woche in Bildern" />
+        <ItemsControl ItemsSource="{Binding Photos}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="7" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:PhotoItem">
+              <StackPanel Margin="0,0,8,0" Spacing="4">
+                <Border Classes="photo" MinHeight="0" Height="120">
+                  <Image Source="{Binding Image}" Stretch="UniformToFill" />
+                </Border>
+                <TextBlock FontWeight="Bold" HorizontalAlignment="Center" Text="{Binding Label}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+
+    <UniformGrid Columns="3">
+      <Border Classes="panel" Margin="0,0,16,0" VerticalAlignment="Stretch">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h3" Text="Was passiert ist" />
+          <ItemsControl ItemsSource="{Binding Happened}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="sys:String">
+                <TextBlock Margin="0,0,0,8" Text="{Binding StringFormat='•  {0}'}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+      <Border Classes="panel" Margin="0,0,16,0" VerticalAlignment="Stretch">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h3" Text="Was ihr gemacht habt" />
+          <TextBlock Classes="muted" IsVisible="{Binding NothingDone}" Text="Nichts im Tagebuch eingetragen." />
+          <ItemsControl ItemsSource="{Binding Done}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="sys:String">
+                <TextBlock Margin="0,0,0,8" Text="{Binding StringFormat='•  {0}'}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+      <Border Classes="box" Background="#1E3324" BorderBrush="#3E6B44" VerticalAlignment="Stretch">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h3" Foreground="#D6F2D8" Text="Für nächste Woche" />
+          <ItemsControl ItemsSource="{Binding NextSteps}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="sys:String">
+                <TextBlock Margin="0,0,0,8" Foreground="#D6F2D8" Text="{Binding StringFormat='•  {0}'}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </UniformGrid>
+
+    <Border Classes="panel" IsVisible="{Binding HasOtherReports}">
+      <StackPanel Spacing="12">
+        <TextBlock Classes="h3" Text="Frühere Berichte" />
+        <ItemsControl ItemsSource="{Binding OtherReports}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:LinkItem">
+              <Button Classes="choice" Classes.active="{Binding IsCurrent}" Margin="0,0,10,10" MinWidth="220"
+                      HorizontalAlignment="Left" Command="{Binding OpenCommand}">
+                <StackPanel>
+                  <TextBlock Text="{Binding Title}" />
+                  <TextBlock FontSize="16" FontWeight="Normal" Text="{Binding Subtitle}" />
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

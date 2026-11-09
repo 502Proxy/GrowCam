@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.ArchiveDetailView"
+             x:DataType="vm:ArchiveDetailViewModel">
+  <StackPanel Spacing="20">
+    <Button Classes="small" HorizontalAlignment="Left" Content="← Zurück zum Archiv" Command="{Binding BackCommand}" />
+    <Grid ColumnDefinitions="3*,2*">
+      <Border Classes="panel" Margin="0,0,20,0" VerticalAlignment="Top">
+        <StackPanel Spacing="16">
+          <StackPanel>
+            <TextBlock FontSize="28" FontWeight="Bold" Text="{Binding Name}" />
+            <TextBlock Classes="muted" Text="{Binding Range}" />
+          </StackPanel>
+          <Border Classes="photo" IsVisible="{Binding Photo, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <Image Source="{Binding Photo}" Stretch="UniformToFill" />
+          </Border>
+          <StackPanel Spacing="6" IsVisible="{Binding HasSummary}">
+            <TextBlock Classes="h3" Text="Fazit" />
+            <TextBlock Text="{Binding Summary}" />
+          </StackPanel>
+          <TextBlock Classes="h3" Text="Meilensteine" />
+          <ItemsControl ItemsSource="{Binding Milestones}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:FactItem">
+                <Border BorderBrush="#2E3B33" BorderThickness="0,0,0,1" Padding="0,12">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding Label}" />
+                    <TextBlock Grid.Column="1" Classes="muted" Text="{Binding Value}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="1" Classes="panel" VerticalAlignment="Top">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h3" Text="Steckbrief" />
+          <ItemsControl ItemsSource="{Binding Facts}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:FactItem">
+                <Border BorderBrush="#2E3B33" BorderThickness="0,0,0,1" Padding="0,12">
+                  <StackPanel>
+                    <TextBlock Classes="muted small" Text="{Binding Label}" />
+                    <TextBlock FontWeight="Bold" Text="{Binding Value}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Classes="h3" Margin="0,12,0,0" IsVisible="{Binding HasReports}" Text="Wochenberichte" />
+          <ItemsControl ItemsSource="{Binding Reports}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Spacing="10" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:LinkItem">
+                <Button Classes="choice small" Command="{Binding OpenCommand}">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" />
+                    <TextBlock FontSize="16" FontWeight="Normal" Text="{Binding Subtitle}" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </StackPanel>
+</UserControl>

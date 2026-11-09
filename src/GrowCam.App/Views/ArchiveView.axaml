@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.ArchiveView"
+             x:DataType="vm:ArchiveViewModel">
+  <Border Classes="panel">
+    <StackPanel Spacing="16">
+      <Button Classes="primary" HorizontalAlignment="Left" Content="Neuen Grow starten" Command="{Binding NewGrowCommand}" />
+      <TextBlock Classes="h2" Margin="0,8,0,0" Text="Frühere Grows" />
+      <TextBlock Classes="muted" IsVisible="{Binding !HasItems}"
+                 Text="Noch keine abgeschlossenen Grows. Wenn du einen Grow beendest oder einen neuen startest, landet der alte hier." />
+      <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Spacing="10" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:LinkItem">
+            <Button Classes="choice" Command="{Binding OpenCommand}">
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" />
+                <TextBlock Classes="muted small" FontWeight="Normal" Text="{Binding Subtitle}" />
+              </StackPanel>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Border>
+</UserControl>

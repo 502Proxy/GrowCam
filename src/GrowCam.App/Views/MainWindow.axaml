@@ -1,0 +1,71 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GrowCam.App.ViewModels"
+        x:Class="GrowCam.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="GrowCam"
+        Icon="/Assets/icon.png"
+        Width="1200" Height="900" MinWidth="760" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <LayoutTransformControl LayoutTransform="{Binding Zoom}">
+      <StackPanel MaxWidth="1100" Margin="24,24,24,48" Spacing="22">
+
+        <!-- Header: name, current grow, font size -->
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+            <Image Source="/Assets/icon.png" Width="48" Height="48" />
+            <StackPanel>
+              <TextBlock Classes="h1" Text="GrowCam" />
+              <TextBlock Classes="muted" Text="{Binding Subtitle}" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock Classes="muted small" Text="Schrift" VerticalAlignment="Center" />
+            <Button Classes="small" Classes.active="{Binding IsFontNormal}" Content="A"
+                    Command="{Binding SetFontScaleCommand}" CommandParameter="1.0"
+                    AutomationProperties.Name="Normale Schrift" />
+            <Button Classes="small" Classes.active="{Binding IsFontLarge}" Content="A+"
+                    Command="{Binding SetFontScaleCommand}" CommandParameter="1.15"
+                    AutomationProperties.Name="Große Schrift" />
+            <Button Classes="small" Classes.active="{Binding IsFontHuge}" Content="A++"
+                    Command="{Binding SetFontScaleCommand}" CommandParameter="1.3"
+                    AutomationProperties.Name="Sehr große Schrift" />
+          </StackPanel>
+        </Grid>
+
+        <!-- Navigation -->
+        <UniformGrid Columns="5">
+          <Button Classes="nav" Classes.active="{Binding IsStart}" Margin="0,0,10,0" Content="Start"
+                  Command="{Binding NavigateCommand}" CommandParameter="start" />
+          <Button Classes="nav" Classes.active="{Binding IsCamera}" Margin="0,0,10,0" Content="Kamera"
+                  Command="{Binding NavigateCommand}" CommandParameter="camera" />
+          <Button Classes="nav" Classes.active="{Binding IsDiary}" Margin="0,0,10,0" Content="Tagebuch"
+                  Command="{Binding NavigateCommand}" CommandParameter="diary" />
+          <Button Classes="nav" Classes.active="{Binding IsArchive}" Margin="0,0,10,0" Content="Archiv"
+                  Command="{Binding NavigateCommand}" CommandParameter="archive" />
+          <Button Classes="nav" Classes.active="{Binding IsSettings}" Content="Einstellungen"
+                  Command="{Binding NavigateCommand}" CommandParameter="settings" />
+        </UniformGrid>
+
+        <!-- Messages (success / error) -->
+        <Border Classes="box" IsVisible="{Binding HasMessage}"
+                Background="{Binding MessageBackground}" BorderBrush="{Binding MessageBorder}">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding Message}" Foreground="{Binding MessageForeground}"
+                       FontWeight="Bold" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="small" Content="OK" Margin="16,0,0,0"
+                    Command="{Binding DismissMessageCommand}" />
+          </Grid>
+        </Border>
+
+        <!-- Current page (resolved by ViewLocator) -->
+        <ContentControl Content="{Binding CurrentPage}" />
+
+        <TextBlock Classes="muted small" Text="{Binding DemoHint}"
+                   IsVisible="{Binding DemoHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
+    </LayoutTransformControl>
+  </ScrollViewer>
+</Window>

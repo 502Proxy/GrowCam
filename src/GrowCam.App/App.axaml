@@ -1,0 +1,201 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:GrowCam.App"
+             x:Class="GrowCam.App.App"
+             RequestedThemeVariant="Dark">
+
+  <Application.DataTemplates>
+    <local:ViewLocator />
+  </Application.DataTemplates>
+
+  <Application.Styles>
+    <FluentTheme />
+
+    <!-- ===== Base ===== -->
+    <Style Selector="Window">
+      <Setter Property="Background" Value="#0F1412" />
+      <Setter Property="Foreground" Value="#F2F6F3" />
+      <Setter Property="FontSize" Value="19" />
+    </Style>
+    <Style Selector="TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="30" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.h3">
+      <Setter Property="FontSize" Value="21" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="#D5DDD7" />
+    </Style>
+    <Style Selector="TextBlock.small">
+      <Setter Property="FontSize" Value="17" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <!-- ===== Panels ===== -->
+    <Style Selector="Border.panel">
+      <Setter Property="Background" Value="#18201C" />
+      <Setter Property="BorderBrush" Value="#2E3B33" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="18" />
+      <Setter Property="Padding" Value="24" />
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="#121815" />
+      <Setter Property="BorderBrush" Value="#2E3B33" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Padding" Value="18" />
+    </Style>
+    <Style Selector="Border.box">
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="18" />
+      <Setter Property="Padding" Value="24" />
+    </Style>
+    <Style Selector="Border.chip">
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="12,3" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Border.chip TextBlock">
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Border.photo">
+      <Setter Property="Background" Value="#0B0F0D" />
+      <Setter Property="BorderBrush" Value="#4A5A50" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="ClipToBounds" Value="True" />
+      <Setter Property="MinHeight" Value="200" />
+    </Style>
+
+    <!-- ===== Buttons: large, high contrast, clear focus ===== -->
+    <Style Selector="Button">
+      <Setter Property="MinHeight" Value="60" />
+      <Setter Property="Padding" Value="24,0" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#F2F6F3" />
+      <Setter Property="BorderBrush" Value="#4A5A50" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#1F2B23" />
+      <Setter Property="BorderBrush" Value="#8FD694" />
+      <Setter Property="Foreground" Value="#F2F6F3" />
+    </Style>
+    <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#26352B" />
+      <Setter Property="BorderBrush" Value="#8FD694" />
+      <Setter Property="Foreground" Value="#F2F6F3" />
+    </Style>
+    <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#9AA59E" />
+      <Setter Property="BorderBrush" Value="#3A4A40" />
+    </Style>
+    <Style Selector="Button:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="#FFD166" />
+    </Style>
+
+    <Style Selector="Button.primary, Button.active">
+      <Setter Property="Background" Value="#8FD694" />
+      <Setter Property="BorderBrush" Value="#8FD694" />
+      <Setter Property="Foreground" Value="#0F1412" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#A9E2AD" />
+      <Setter Property="BorderBrush" Value="#A9E2AD" />
+      <Setter Property="Foreground" Value="#0F1412" />
+    </Style>
+
+    <Style Selector="Button.light">
+      <Setter Property="Background" Value="#F2F6F3" />
+      <Setter Property="BorderBrush" Value="#F2F6F3" />
+      <Setter Property="Foreground" Value="#0F1412" />
+    </Style>
+    <Style Selector="Button.light:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#0F1412" />
+    </Style>
+
+    <Style Selector="Button.outline">
+      <Setter Property="BorderBrush" Value="#8FD694" />
+    </Style>
+    <Style Selector="Button.small">
+      <Setter Property="MinHeight" Value="52" />
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="Padding" Value="16,0" />
+    </Style>
+    <Style Selector="Button.choice">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Background" Value="#121815" />
+      <Setter Property="Padding" Value="18,10" />
+    </Style>
+    <Style Selector="Button.nav">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Background" Value="#18201C" />
+    </Style>
+    <Style Selector="Button.nav.active">
+      <Setter Property="Background" Value="#8FD694" />
+      <Setter Property="Foreground" Value="#0F1412" />
+    </Style>
+
+    <!-- ===== Inputs ===== -->
+    <Style Selector="TextBox, ComboBox, NumericUpDown, CalendarDatePicker">
+      <Setter Property="MinHeight" Value="60" />
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="BorderBrush" Value="#4A5A50" />
+      <Setter Property="Background" Value="#0F1412" />
+      <Setter Property="Foreground" Value="#F2F6F3" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Padding" Value="14,0" />
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="MinHeight" Value="52" />
+    </Style>
+  </Application.Styles>
+
+  <TrayIcon.Icons>
+    <TrayIcons>
+      <TrayIcon Icon="/Assets/icon.png" ToolTipText="GrowCam" Clicked="TrayIcon_OnClicked">
+        <TrayIcon.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="GrowCam öffnen" Click="OpenMenuItem_OnClick" />
+            <NativeMenuItemSeparator />
+            <NativeMenuItem Header="Beenden" Click="QuitMenuItem_OnClick" />
+          </NativeMenu>
+        </TrayIcon.Menu>
+      </TrayIcon>
+    </TrayIcons>
+  </TrayIcon.Icons>
+</Application>

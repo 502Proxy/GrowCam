@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.CameraView"
+             x:DataType="vm:CameraViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.arrow">
+      <Setter Property="Width" Value="84" />
+      <Setter Property="Height" Value="84" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="34" />
+      <Setter Property="Background" Value="#121815" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid ColumnDefinitions="3*,2*">
+    <!-- Live view -->
+    <Border Classes="panel" Margin="0,0,20,0" VerticalAlignment="Top">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="Live-Bild" />
+        <Border Classes="photo">
+          <Image Source="{Binding LiveImage}" Stretch="Uniform" />
+        </Border>
+        <TextBlock Classes="muted" Text="{Binding LiveStatus}" />
+        <Button Classes="outline" HorizontalAlignment="Left" Content="Diese Ansicht für Fotos merken"
+                Command="{Binding RememberViewCommand}" IsEnabled="{Binding !IsBusy}" />
+        <TextBlock Classes="muted" Text="{Binding AnalysisInfo}" />
+      </StackPanel>
+    </Border>
+
+    <!-- Controls -->
+    <Border Grid.Column="1" Classes="panel" VerticalAlignment="Top">
+      <StackPanel Spacing="20">
+        <TextBlock Classes="h2" Text="Kamera bewegen" />
+        <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" HorizontalAlignment="Center">
+          <Button Grid.Row="0" Grid.Column="1" Classes="arrow" Margin="5" Content="↑" AutomationProperties.Name="Nach oben"
+                  Command="{Binding MoveCommand}" CommandParameter="Up" />
+          <Button Grid.Row="1" Grid.Column="0" Classes="arrow" Margin="5" Content="←" AutomationProperties.Name="Nach links"
+                  Command="{Binding MoveCommand}" CommandParameter="Left" />
+          <Button Grid.Row="1" Grid.Column="2" Classes="arrow" Margin="5" Content="→" AutomationProperties.Name="Nach rechts"
+                  Command="{Binding MoveCommand}" CommandParameter="Right" />
+          <Button Grid.Row="2" Grid.Column="1" Classes="arrow" Margin="5" Content="↓" AutomationProperties.Name="Nach unten"
+                  Command="{Binding MoveCommand}" CommandParameter="Down" />
+        </Grid>
+        <TextBlock Classes="muted small" HorizontalAlignment="Center" Text="{Binding BusyText}" />
+
+        <StackPanel Spacing="10" IsVisible="{Binding HasPresets}">
+          <TextBlock Classes="h3" Text="Gespeicherte Ansichten" />
+          <ItemsControl ItemsSource="{Binding Presets}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Spacing="10" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PresetItem">
+                <Button Classes="choice" Classes.active="{Binding IsAnalysisView}" Command="{Binding GoCommand}">
+                  <TextBlock Text="{Binding Name}" />
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

@@ -1,0 +1,152 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.WizardView"
+             x:DataType="vm:WizardViewModel">
+  <Border Classes="panel" MaxWidth="780" HorizontalAlignment="Center">
+    <StackPanel Spacing="22">
+
+      <!-- Progress -->
+      <StackPanel Spacing="10" IsVisible="{Binding !IsDone}">
+        <TextBlock Classes="muted" FontWeight="Bold" Text="{Binding StepText}" />
+        <UniformGrid Columns="3">
+          <Border Height="10" CornerRadius="5" Margin="0,0,8,0" Background="#8FD694" />
+          <Border Height="10" CornerRadius="5" Margin="0,0,8,0" Background="#3A4A40">
+            <Border CornerRadius="5" Background="#8FD694" IsVisible="{Binding Step2Reached}" />
+          </Border>
+          <Border Height="10" CornerRadius="5" Background="#3A4A40">
+            <Border CornerRadius="5" Background="#8FD694" IsVisible="{Binding Step3Reached}" />
+          </Border>
+        </UniformGrid>
+      </StackPanel>
+
+      <!-- Step 1: name and date -->
+      <StackPanel Spacing="20" IsVisible="{Binding IsStep1}">
+        <StackPanel>
+          <TextBlock Classes="label" Text="Wie soll der Grow heißen?" />
+          <TextBox Text="{Binding GrowName}" Watermark="z. B. Winter 2026" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Wann kommen die Samen in die Erde?" />
+          <CalendarDatePicker SelectedDate="{Binding SowDate}" Width="300" HorizontalAlignment="Left" />
+        </StackPanel>
+        <Border Classes="box" Background="#1C2A38" BorderBrush="#3A5A78" IsVisible="{Binding HasRunningGrow}">
+          <TextBlock Foreground="#DCEBFA">
+            <Run Text="Der laufende Grow „" /><Run Text="{Binding RunningGrowName}" /><Run Text="“ wird mit allen Bildern und Berichten ins Archiv verschoben." />
+          </TextBlock>
+        </Border>
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Button Content="Abbrechen" Command="{Binding CancelCommand}" />
+          <Button Grid.Column="2" Classes="primary" Content="Weiter" Command="{Binding NextCommand}" />
+        </Grid>
+      </StackPanel>
+
+      <!-- Step 2: strain search -->
+      <StackPanel Spacing="18" IsVisible="{Binding IsStep2}">
+        <StackPanel>
+          <TextBlock Classes="label" Text="Welche Samen hast du?" />
+          <TextBox Text="{Binding Query}" Watermark="Name der Sorte, z. B. Northern Lights" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <Button Classes="primary" Content="Suchen" Command="{Binding SearchCommand}" IsEnabled="{Binding !IsBusy}" />
+          <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding BusyText}" />
+        </StackPanel>
+
+        <StackPanel Spacing="10" IsVisible="{Binding HasResults}">
+          <TextBlock Classes="muted" Text="Tippe auf deine Sorte:" />
+          <ItemsControl ItemsSource="{Binding Results}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Spacing="10" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SeedResultItem">
+                <Button Classes="choice" Command="{Binding PickCommand}">
+                  <StackPanel>
+                    <TextBlock FontSize="21" FontWeight="Bold" Text="{Binding Name}" />
+                    <TextBlock Classes="muted small" FontWeight="Normal" Text="{Binding TypeLabel}" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+        <Border Classes="box" Background="#3A2C15" BorderBrush="#7A5A22"
+                IsVisible="{Binding SearchMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+          <TextBlock Foreground="#FFE2A8" Text="{Binding SearchMessage}" />
+        </Border>
+
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Button Content="Zurück" Command="{Binding BackCommand}" />
+          <Button Grid.Column="2" Content="Sorte selbst eintragen" Command="{Binding EnterManuallyCommand}" />
+        </Grid>
+      </StackPanel>
+
+      <!-- Step 3: check and correct strain data -->
+      <StackPanel Spacing="16" IsVisible="{Binding IsStep3}">
+        <TextBlock Classes="muted" IsVisible="{Binding FoundOnline}"
+                   Text="Diese Infos wurden im Internet gefunden. Du kannst sie korrigieren." />
+        <TextBlock Classes="muted" IsVisible="{Binding !FoundOnline}"
+                   Text="Trag ein, was du über die Sorte weißt. Alles außer dem Namen ist freiwillig." />
+        <StackPanel>
+          <TextBlock Classes="label" Text="Name der Sorte" />
+          <TextBox Text="{Binding SeedName}" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Typ" />
+          <ComboBox ItemsSource="{Binding SeedTypeLabels}" SelectedIndex="{Binding SeedTypeIndex}" />
+        </StackPanel>
+        <Grid ColumnDefinitions="*,*">
+          <StackPanel Margin="0,0,10,0">
+            <TextBlock Classes="label" Text="Wochen bis Ernte" />
+            <NumericUpDown Value="{Binding WeeksToHarvest}" Minimum="1" Maximum="40" Increment="1" FormatString="0" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock Classes="label" Text="Blütezeit (Wochen)" />
+            <NumericUpDown Value="{Binding FloweringWeeks}" Minimum="1" Maximum="20" Increment="1" FormatString="0" />
+          </StackPanel>
+        </Grid>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Höhe im Zelt" />
+          <TextBox Text="{Binding Height}" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Licht" />
+          <TextBox Text="{Binding LightSchedule}" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Schwierigkeit" />
+          <TextBox Text="{Binding Difficulty}" />
+        </StackPanel>
+
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="label" VerticalAlignment="Center" Text="Wie viele Pflanzen?" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+            <Button Width="64" Padding="0" FontSize="28" Content="−" AutomationProperties.Name="Eine Pflanze weniger"
+                    Command="{Binding PlantsMinusCommand}" />
+            <TextBlock MinWidth="44" FontSize="30" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding Plants}" />
+            <Button Width="64" Padding="0" FontSize="28" Content="+" AutomationProperties.Name="Eine Pflanze mehr"
+                    Command="{Binding PlantsPlusCommand}" />
+          </StackPanel>
+        </Grid>
+
+        <Border Classes="box" Background="#1C2A38" BorderBrush="#3A5A78">
+          <TextBlock Foreground="#DCEBFA" Text="Die KI nutzt diese Infos, um z. B. die Blüte richtig einzuschätzen." />
+        </Border>
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Button Content="Andere Sorte" Command="{Binding BackCommand}" />
+          <Button Grid.Column="2" Classes="primary" Content="Grow starten" Command="{Binding StartGrowCommand}" />
+        </Grid>
+      </StackPanel>
+
+      <!-- Done -->
+      <StackPanel Spacing="18" IsVisible="{Binding IsDone}">
+        <TextBlock Classes="h1" Text="Der neue Grow läuft!" />
+        <TextBlock Text="Die KI meldet sich, sobald die ersten Keimlinge zu sehen sind." />
+        <Button Classes="primary" HorizontalAlignment="Left" Content="Zum Start" Command="{Binding FinishCommand}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.DiaryView"
+             x:DataType="vm:DiaryViewModel">
+  <Grid ColumnDefinitions="3*,2*">
+
+    <!-- Milestone timeline -->
+    <Border Classes="panel" Margin="0,0,20,0" VerticalAlignment="Top">
+      <StackPanel Spacing="18">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel>
+            <TextBlock Classes="h2" Text="So weit sind die Pflanzen" />
+            <TextBlock Classes="muted" Text="{Binding GrowTitle}" />
+            <TextBlock Classes="muted" Text="{Binding GrowDetails}" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="outline small" VerticalAlignment="Top" Content="Neuen Grow starten"
+                  Command="{Binding NewGrowCommand}" />
+        </Grid>
+
+        <ItemsControl ItemsSource="{Binding Milestones}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:MilestoneItem">
+              <Grid ColumnDefinitions="36,*">
+                <!-- dot + connecting line -->
+                <Grid RowDefinitions="Auto,*">
+                  <Ellipse Width="26" Height="26" Margin="0,4,0,0" Fill="{Binding DotFill}"
+                           Stroke="{Binding DotStroke}" StrokeThickness="3" HorizontalAlignment="Center" />
+                  <Rectangle Grid.Row="1" Width="3" Fill="#3A4A40" Margin="0,4,0,0"
+                             HorizontalAlignment="Center" IsVisible="{Binding ShowLine}" />
+                </Grid>
+                <StackPanel Grid.Column="1" Margin="12,0,0,24" Spacing="6">
+                  <TextBlock Classes="h3" Text="{Binding Title}" />
+                  <TextBlock Text="{Binding DateText}" />
+                  <Border Classes="chip" Background="{Binding SourceChip.Background}" BorderBrush="{Binding SourceChip.BorderBrush}">
+                    <TextBlock Foreground="{Binding SourceChip.Foreground}" Text="{Binding SourceChip.Text}" />
+                  </Border>
+                  <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsPending}">
+                    <Button Classes="primary small" Content="Ja, stimmt" Command="{Binding ConfirmCommand}" />
+                    <Button Classes="small" Content="Noch nicht" Command="{Binding RejectCommand}" />
+                  </StackPanel>
+                  <Button Classes="small" HorizontalAlignment="Left" Content="Ist schon so weit"
+                          IsVisible="{Binding CanConfirmManually}" Command="{Binding ConfirmCommand}" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Classes="small" HorizontalAlignment="Left" Content="Geerntet – Grow beenden"
+                Command="{Binding AskFinishCommand}" IsVisible="{Binding !ConfirmFinish}" />
+        <Border Classes="box" Background="#3A2C15" BorderBrush="#7A5A22" IsVisible="{Binding ConfirmFinish}">
+          <StackPanel Spacing="12">
+            <TextBlock Foreground="#FFE2A8" FontWeight="Bold" Text="Grow wirklich beenden und ins Archiv legen?" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <Button Classes="light small" Content="Ja, beenden" Command="{Binding FinishCommand}" />
+              <Button Classes="small" Foreground="#FFE2A8" BorderBrush="#FFE2A8" Content="Abbrechen" Command="{Binding CancelFinishCommand}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Border>
+
+    <!-- What was done -->
+    <Border Grid.Column="1" Classes="panel" VerticalAlignment="Top">
+      <StackPanel Spacing="16">
+        <TextBlock Classes="h2" Text="Was wurde gemacht?" />
+        <ItemsControl ItemsSource="{Binding QuickActions}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="2" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:QuickAction">
+              <Button Margin="0,0,10,10" HorizontalAlignment="Stretch" MinHeight="64" Background="#121815"
+                      Content="{Binding Label}" Command="{Binding Command}" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Spacing="8">
+          <TextBlock Classes="label" Text="Notiz" />
+          <TextBox Text="{Binding NoteText}" Watermark="z. B. Lampe höher gehängt" />
+          <Button HorizontalAlignment="Stretch" Content="Notiz speichern" Command="{Binding SaveNoteCommand}" />
+        </StackPanel>
+        <TextBlock Classes="muted small" Text="Datum und Uhrzeit werden automatisch eingetragen." />
+
+        <TextBlock Classes="muted" IsVisible="{Binding !HasEntries}" Text="Noch keine Einträge." />
+        <ItemsControl ItemsSource="{Binding Entries}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Spacing="10" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:DiaryItem">
+              <Border Classes="card" Padding="14,10">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel>
+                    <TextBlock FontWeight="Bold" Text="{Binding Title}" />
+                    <TextBlock Classes="muted" Text="{Binding Text}" IsVisible="{Binding HasText}" />
+                    <TextBlock Classes="muted small" Text="{Binding When}" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Classes="small" VerticalAlignment="Center" Content="Löschen"
+                          Command="{Binding DeleteCommand}" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

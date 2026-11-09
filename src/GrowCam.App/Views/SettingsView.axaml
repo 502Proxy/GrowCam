@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <StackPanel Spacing="20" MaxWidth="820" HorizontalAlignment="Left">
+
+    <!-- Updates -->
+    <Border Classes="panel">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="Updates" />
+        <Border Classes="box" Background="#1C2A38" BorderBrush="#3A5A78">
+          <TextBlock Foreground="#DCEBFA" FontWeight="Bold" Text="{Binding UpdateStatus}" />
+        </Border>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button Classes="outline" Content="Nach Updates suchen" Command="{Binding CheckUpdatesCommand}" IsEnabled="{Binding !IsBusy}" />
+          <Button Classes="primary" Content="Jetzt installieren" Command="{Binding InstallUpdateCommand}" IsVisible="{Binding CanInstallUpdate}" />
+        </StackPanel>
+        <TextBlock Classes="muted" Text="{Binding BusyText}" />
+        <TextBlock Classes="muted">
+          <Run Text="Version " /><Run Text="{Binding Version}" />
+        </TextBlock>
+        <CheckBox IsChecked="{Binding AutoInstall}" Content="Updates automatisch installieren" />
+      </StackPanel>
+    </Border>
+
+    <!-- Camera -->
+    <Border Classes="panel">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="Kamera (Tapo)" />
+        <TextBlock Classes="muted small"
+                   Text="Leer lassen für den Demo-Modus. Benutzer und Passwort sind das „Kamera-Konto“ aus der Tapo-App (Kamera-Einstellungen → Erweitert)." />
+        <StackPanel>
+          <TextBlock Classes="label" Text="IP-Adresse der Kamera" />
+          <TextBox Text="{Binding CameraHost}" Watermark="z. B. 192.168.178.50" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Benutzer" />
+          <TextBox Text="{Binding CameraUser}" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Passwort" />
+          <TextBox Text="{Binding CameraPassword}" PasswordChar="•" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="ffmpeg (nur falls nicht gefunden)" />
+          <TextBox Text="{Binding FfmpegPath}" Watermark="leer = automatisch" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- AI -->
+    <Border Classes="panel">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="KI (Claude)" />
+        <TextBlock Classes="muted small" Text="Leer lassen für Beispiel-Antworten. Den Schlüssel gibt es auf platform.claude.com." />
+        <StackPanel>
+          <TextBlock Classes="label" Text="API-Schlüssel" />
+          <TextBox Text="{Binding ApiKey}" PasswordChar="•" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Modell" />
+          <TextBox Text="{Binding Model}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Schedule -->
+    <Border Classes="panel">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="Zeitplan" />
+        <Grid ColumnDefinitions="*,*">
+          <StackPanel Margin="0,0,10,0">
+            <TextBlock Classes="label" Text="Tägliche Prüfung" />
+            <TextBox Text="{Binding AnalysisTime}" Watermark="12:00" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock Classes="label" Text="Wochenbericht (sonntags)" />
+            <TextBox Text="{Binding ReportTime}" Watermark="20:00" />
+          </StackPanel>
+        </Grid>
+        <Grid ColumnDefinitions="*,*">
+          <StackPanel Margin="0,0,10,0">
+            <TextBlock Classes="label" Text="Licht an" />
+            <TextBox Text="{Binding LightOn}" Watermark="06:00" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock Classes="label" Text="Licht aus" />
+            <TextBox Text="{Binding LightOff}" Watermark="00:00" />
+          </StackPanel>
+        </Grid>
+        <StackPanel>
+          <TextBlock Classes="label" Text="Extra-Fotos alle … Minuten (0 = aus)" />
+          <NumericUpDown Value="{Binding SnapshotInterval}" Minimum="0" Maximum="720" Increment="15" FormatString="0" Width="220" HorizontalAlignment="Left" />
+        </StackPanel>
+        <Button Classes="small" HorizontalAlignment="Left" Content="Wochenbericht für letzte Woche jetzt erstellen"
+                Command="{Binding GenerateReportCommand}" />
+      </StackPanel>
+    </Border>
+
+    <!-- System -->
+    <Border Classes="panel">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="System" />
+        <CheckBox IsChecked="{Binding StartWithWindows}" IsVisible="{Binding AutostartSupported}"
+                  Content="GrowCam mit Windows starten" />
+        <StackPanel>
+          <TextBlock Classes="label" Text="GitHub-Zugang für Updates" />
+          <TextBox Text="{Binding UpdateToken}" PasswordChar="•" Watermark="Token mit Leserecht auf das Repo" />
+        </StackPanel>
+        <TextBlock Classes="muted small" Text="{Binding DataFolder, StringFormat='Daten liegen in: {0}'}" />
+        <Button Classes="small" HorizontalAlignment="Left" Content="Daten-Ordner öffnen" Command="{Binding OpenDataFolderCommand}" />
+      </StackPanel>
+    </Border>
+
+    <Button Classes="primary" HorizontalAlignment="Left" Content="Einstellungen speichern" Command="{Binding SaveCommand}" />
+  </StackPanel>
+</UserControl>

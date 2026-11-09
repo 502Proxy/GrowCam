@@ -1,156 +1,113 @@
 # GrowCam
 
-Lightweight grow tent monitor: a TP-Link Tapo camera takes photos, Claude looks
-at them once a day, and a large-print web app shows the result – built to be
-easy to read and use for someone with poor eyesight.
+Desktop app that watches a grow tent with a TP-Link Tapo camera, lets Claude
+check the plants once a day and shows the result in a large-print, high-contrast
+window – built to be easy to read and use for someone with poor eyesight.
+
+Developed and tested on macOS, deployed on Windows as a normal installed program
+(Start menu entry, starts with Windows, keeps running in the tray).
 
 **Features**
 
 - Daily AI check (deficiencies, pests, mould, stress) with plain-language advice
 - Grow diary: milestones (sprouted, vegetative, flowering) are detected by the AI and confirmed with one tap
 - New-grow wizard with automatic strain lookup on the web
-- Camera control (pan/tilt, saved views, fixed "analysis view")
-- Weekly report every Sunday
-- Archive of finished grows
-- Self-updating from release tags of this private repo
-- Font-size switch, high contrast, big buttons, works without JavaScript
+- Camera control: pan/tilt, saved views, fixed "analysis view" (ONVIF)
+- Weekly report every Sunday, archive of finished grows
+- Font-size switch (A / A+ / A++), big buttons, closing the window keeps it running in the tray
+- Self-updates from GitHub releases of this private repo
+- Demo mode without camera and API key
 
-**Lightweight by design:** 4 small dependencies (Starlette, Uvicorn, Jinja2,
-python-multipart) + optional `pytapo`, SQLite from the standard library, no
-build step, no frontend framework, ~25 lines of JavaScript.
+The previous Python/web version lives in the branch `python-legacy`.
 
-## Try it (demo mode, no hardware)
+## Develop on the Mac
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate            # Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt
-python -m growcam
+brew install --cask dotnet-sdk   # .NET 10 SDK
+brew install ffmpeg              # only needed with a real camera
+dotnet run --project src/GrowCam.App
+dotnet test GrowCam.slnx
 ```
 
-Open <http://localhost:8080>. Without camera and API key the app uses a demo
-image and sample AI answers.
+Without camera and API key the app runs in demo mode. Data lives in
+`~/Library/Application Support/GrowCamData` (override with `GROWCAM_DATA_DIR`).
 
-## Setup on the Windows PC
+Building the Windows program on the Mac (for a quick test on the PC):
 
-### 1. Install the tools (once)
-
-```powershell
-winget install Python.Python.3.12 Git.Git Gyan.FFmpeg NSSM.NSSM
+```bash
+dotnet publish src/GrowCam.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o out/win
 ```
 
-Open a **new** PowerShell afterwards so the tools are on `PATH`.
+Copy `out/win/GrowCam.exe` plus an `ffmpeg.exe` next to it to the PC.
 
-### 2. Deploy key (read-only access to this private repo)
+## Releases and installation on Windows
 
-```powershell
-mkdir C:\GrowCam-key
-ssh-keygen -t ed25519 -C growcam-pc -f C:\GrowCam-key\id_ed25519
-# press Enter twice (no passphrase)
-Get-Content C:\GrowCam-key\id_ed25519.pub
-```
-
-GitHub → repo **Settings → Deploy keys → Add deploy key**, paste the public key,
-leave *Allow write access* **unchecked**.
-
-### 3. Clone
-
-```powershell
-cd C:\
-git -c core.sshCommand="ssh -i C:/GrowCam-key/id_ed25519" clone git@github.com:502Proxy/GrowCam.git GrowCam
-move C:\GrowCam-key C:\GrowCam\.deploy     # git-ignored, used by the updater
-cd C:\GrowCam
-```
-
-### 4. Configure
-
-```powershell
-copy .env.example .env
-notepad .env
-```
-
-| Setting | Where to get it |
-|---|---|
-| `TAPO_HOST` | Camera IP – give it a fixed IP in the router |
-| `TAPO_RTSP_USER` / `TAPO_RTSP_PASSWORD` | Tapo app → camera → Settings → Advanced → **Camera account** |
-| `TAPO_CLOUD_PASSWORD` | Password of your Tapo app login (only for moving the camera) |
-| `ANTHROPIC_API_KEY` | <https://platform.claude.com> → API keys |
-
-In the Tapo app also turn **night vision off** (IR images are useless for the
-colour analysis) and optionally the status LED.
-
-### 5. Install the service
-
-In an **admin** PowerShell:
-
-```powershell
-cd C:\GrowCam
-powershell -ExecutionPolicy Bypass -File scripts\install.ps1
-```
-
-This creates `.venv`, installs a Windows service *GrowCam* (starts with
-Windows), a scheduled task *GrowCam Updater* (every 15 min) and a firewall
-rule for the home network. The script prints the address to open on phone/tablet.
-
-Then: open the app → **Kamera** → aim the camera → **"Diese Ansicht für Fotos merken"**.
-
-## Releasing an update
-
-The PC only installs **tagged releases**, so you can push to `main` freely:
+GitHub Actions builds every push. A **tag** creates a release with the installer:
 
 ```bash
 git tag v0.2.0
 git push origin v0.2.0
 ```
 
-Within 15 minutes the updater fetches the tag, installs requirements and
-restarts the service (rolls back if installing fails). With *"Updates
-automatisch installieren"* switched off, the app shows a button instead.
+The release contains `GrowCam-win-Setup.exe` (installer, includes `ffmpeg.exe`)
+and a portable zip. Install once on the PC with the setup – afterwards the app
+updates itself.
+
+### Setup on the PC (once)
+
+1. Run `GrowCam-win-Setup.exe`.
+2. In GrowCam → **Einstellungen**:
+   - **Kamera**: IP of the camera (give it a fixed IP in the router) and the
+     *camera account* from the Tapo app (Camera settings → Advanced → Camera account).
+   - **KI**: API key from <https://platform.claude.com>.
+   - **GitHub-Zugang**: a fine-grained personal access token with *read-only*
+     access to *Contents* of this repo (needed because the repo is private).
+   - Tick **"GrowCam mit Windows starten"**, then **Speichern**.
+3. In the Tapo app: turn **night vision off** (IR images are useless for colour
+   analysis); ONVIF/RTSP must be allowed for the camera account.
+4. **Kamera** page → aim the camera → **"Diese Ansicht für Fotos merken"**.
+
+Updates are checked every 6 hours (and at start); with *"Updates automatisch
+installieren"* they install and restart on their own.
 
 ## Architecture
 
 Clean architecture – dependencies point inwards only:
 
 ```
-growcam/
-  domain/models.py           entities + rules (phases, milestones, expected dates) – no I/O
-  application/ports.py       interfaces (Camera, PlantAnalyzer, repositories, …)
-  application/services.py    use cases: GrowService, MonitoringService, CameraService,
-                             ReportService, SeedService
-  infrastructure/            adapters: SQLite, file image store, Tapo (ffmpeg + pytapo),
-                             Claude (urllib), demo fakes, updater bridge
-  web/                       Starlette routes + Jinja templates (server-rendered)
-  scheduler.py               asyncio loop: hourly photos, daily check, Sunday report
-  container.py               composition root (the only place that picks adapters)
-scripts/update.py            standalone self-updater (stdlib only)
-scripts/install.ps1          Windows installer
+src/
+  GrowCam.Domain          entities + rules (phases, milestones, expected dates) – no dependencies
+  GrowCam.Application     ports (ICamera, IPlantAnalyzer, repositories …) and use cases:
+                          GrowService, MonitoringService, CameraService, ReportService,
+                          SeedService, ScheduleService
+  GrowCam.Infrastructure  adapters: SQLite (Microsoft.Data.Sqlite), file image store,
+                          Tapo camera (ffmpeg for RTSP snapshots + ONVIF for pan/tilt),
+                          Claude via HttpClient, demo fakes, JSON settings, autostart
+  GrowCam.App             Avalonia UI (MVVM with CommunityToolkit.Mvvm), tray icon,
+                          composition root, background scheduler, Velopack updater
+tests/GrowCam.Tests       xUnit tests for domain, services and AI adapters
 ```
 
-Design patterns used: Ports & Adapters (camera/AI/storage are swappable),
-Repository, Composition Root / dependency injection, Strategy (demo vs. real
-adapters), Post/Redirect/Get in the web layer.
+Patterns: Ports & Adapters, Repository, Composition Root, Proxy + Strategy
+(`ConfiguredCamera` / `ConfiguredAi` switch between real and demo adapters when
+settings change – no restart needed), MVVM, convention-based ViewLocator.
 
-Data lives in `data/` (SQLite DB, photos, logs) and is never touched by updates.
+**Dependencies (lightweight):** Avalonia, CommunityToolkit.Mvvm,
+Microsoft.Data.Sqlite, Velopack. No ORM, no AI SDK, no DI container.
 
 ## AI usage and cost
 
-| Job | When | Model input |
+| Job | When | Input |
 |---|---|---|
-| Plant check | daily at `ANALYSIS_TIME` + on demand | today's photo + previous check photo |
-| Weekly report | Sundays at `REPORT_TIME` | one photo per day |
+| Plant check | daily at the configured time + on demand | today's photo + previous check photo |
+| Weekly report | Sundays at the configured time | one photo per day |
 | Strain lookup | new-grow wizard | web search (cached per strain) |
 
-Structured results come from forced tool calls (JSON schema), so parsing never
-depends on free text. Expect a few cents per day.
+Results come back as JSON via forced tool calls, so nothing depends on parsing
+free text. Expect a few cents per day.
 
-## Security
+## Notes
 
-The app has no login – keep it inside the home network. **Do not** forward the
-port in the router. Secrets live only in `.env` and `.deploy/` (both git-ignored).
-
-## Development
-
-```bash
-pip install -r requirements-dev.txt
-pytest
-```
+- Everything runs locally on the PC; nothing is reachable from outside.
+- Secrets (camera password, API key, GitHub token) are stored in
+  `settings.json` in the data folder on the PC, never in the repo.

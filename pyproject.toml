@@ -1,8 +1,0 @@
-[project]
-name = "growcam"
-dynamic = ["version"]
-description = "Lightweight grow tent monitoring with a Tapo camera and AI image analysis"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]

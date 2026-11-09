@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GrowCam.App.ViewModels"
+             x:Class="GrowCam.App.Views.StartView"
+             x:DataType="vm:StartViewModel">
+  <StackPanel Spacing="20">
+
+    <!-- No grow yet -->
+    <Border Classes="box" IsVisible="{Binding !HasGrow}" Background="#1C2A38" BorderBrush="#3A5A78">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Foreground="#DCEBFA" Text="Willkommen bei GrowCam" />
+        <TextBlock Foreground="#DCEBFA"
+                   Text="Gerade läuft kein Grow. Starte einen neuen, dann macht die Kamera jeden Tag Fotos und die KI schaut sich die Pflanzen an." />
+        <Button Classes="light" HorizontalAlignment="Left" Content="Neuen Grow starten" Command="{Binding StartGrowCommand}" />
+      </StackPanel>
+    </Border>
+
+    <StackPanel Spacing="20" IsVisible="{Binding HasGrow}">
+
+      <!-- Overall status -->
+      <Border Classes="box" Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}">
+        <StackPanel Spacing="12">
+          <TextBlock FontSize="28" FontWeight="Bold" Foreground="{Binding StatusForeground}" Text="{Binding StatusHeadline}" />
+          <TextBlock Foreground="{Binding StatusForeground}" Text="{Binding StatusText}" />
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <Button Classes="light" Content="Pflanzen jetzt prüfen" Command="{Binding AnalyzeCommand}" IsEnabled="{Binding !IsBusy}" />
+            <TextBlock Foreground="{Binding StatusForeground}" FontWeight="Bold" VerticalAlignment="Center" Text="{Binding BusyText}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- AI question -->
+      <Border Classes="box" IsVisible="{Binding HasSuggestion}" Background="#3A2C15" BorderBrush="#7A5A22">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h2" Foreground="#FFE2A8" Text="{Binding SuggestionQuestion}" />
+          <TextBlock Foreground="#FFE2A8" Text="{Binding SuggestionNote}" />
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button Classes="light" Content="Ja, stimmt" Command="{Binding ConfirmSuggestionCommand}" />
+            <Button Content="Noch nicht" Foreground="#FFE2A8" BorderBrush="#FFE2A8" Command="{Binding RejectSuggestionCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Weekly report -->
+      <Border Classes="box" IsVisible="{Binding HasReport}" Background="#1C2A38" BorderBrush="#3A5A78">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="4">
+            <TextBlock Foreground="#B3D8FA" FontWeight="Bold" Text="{Binding ReportLabel}" />
+            <TextBlock Classes="h2" Foreground="#DCEBFA" Text="{Binding ReportHeadline}" />
+            <TextBlock Foreground="#DCEBFA" Text="{Binding ReportRange}" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="light" Margin="16,0,0,0" VerticalAlignment="Center"
+                  Content="Bericht lesen" Command="{Binding OpenReportCommand}" />
+        </Grid>
+      </Border>
+
+      <Grid ColumnDefinitions="3*,2*">
+        <!-- Findings -->
+        <Border Classes="panel" Margin="0,0,20,0" VerticalAlignment="Top">
+          <StackPanel Spacing="14">
+            <TextBlock Classes="h2" Text="Was die KI sieht" />
+            <TextBlock Classes="muted" IsVisible="{Binding !HasFindings}"
+                       Text="Sobald die KI die Pflanzen geprüft hat, steht hier, was ihr auffällt." />
+            <ItemsControl ItemsSource="{Binding Findings}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Spacing="12" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:FindingItem">
+                  <Border Classes="card">
+                    <StackPanel Spacing="8">
+                      <Border Classes="chip" Background="{Binding Chip.Background}" BorderBrush="{Binding Chip.BorderBrush}">
+                        <TextBlock Foreground="{Binding Chip.Foreground}" Text="{Binding Chip.Text}" />
+                      </Border>
+                      <TextBlock Classes="h3" Text="{Binding Title}" />
+                      <TextBlock>
+                        <Run FontWeight="Bold" Text="Was tun? " />
+                        <Run Text="{Binding Advice}" />
+                      </TextBlock>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Latest photo -->
+        <Border Grid.Column="1" Classes="panel" VerticalAlignment="Top">
+          <StackPanel Spacing="14">
+            <TextBlock Classes="h2" Text="Letztes Foto" />
+            <Border Classes="photo">
+              <Image Source="{Binding Photo}" Stretch="UniformToFill" />
+            </Border>
+            <TextBlock Classes="muted" Text="{Binding PhotoCaption}" />
+            <Button Classes="primary" HorizontalAlignment="Stretch" Content="Neues Foto machen"
+                    Command="{Binding TakePhotoCommand}" IsEnabled="{Binding !IsBusy}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

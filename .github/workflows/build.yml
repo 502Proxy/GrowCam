@@ -1,0 +1,66 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to publish releases on tags
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Test
+        run: dotnet test GrowCam.slnx -c Release
+
+      - name: Determine version
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") { $v = "${{ github.ref_name }}".TrimStart("v") }
+          else { $v = "0.0.${{ github.run_number }}" }
+          "VERSION=$v" >> $env:GITHUB_ENV
+
+      - name: Publish (self-contained, win-x64)
+        run: dotnet publish src/GrowCam.App/GrowCam.App.csproj -c Release -r win-x64 --self-contained -p:Version=${{ env.VERSION }} -o publish
+
+      - name: Bundle ffmpeg
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg
+          $exe = Get-ChildItem ffmpeg -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          Copy-Item $exe.FullName publish/
+
+      - name: Build installer (Velopack)
+        run: |
+          dotnet tool install -g vpk
+          vpk pack --packId GrowCam --packVersion ${{ env.VERSION }} --packDir publish --mainExe GrowCam.exe --packTitle GrowCam --icon src/GrowCam.App/Assets/icon.ico
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GrowCam-${{ env.VERSION }}
+          path: Releases/
+
+      - name: Publish GitHub release
+        if: github.ref_type == 'tag'
+        run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "GrowCam ${{ env.VERSION }}" --tag ${{ github.ref_name }}
+
+  macos:
+    # Make sure the app keeps building on the Mac used for development.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet build GrowCam.slnx -c Release

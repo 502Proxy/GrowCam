@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Adapters implementing the application ports. -->
+  <ItemGroup>
+    <ProjectReference Include="..\GrowCam.Application\GrowCam.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Camera\demo.jpg" LogicalName="GrowCam.demo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="GrowCam.Tests" />
+  </ItemGroup>
+</Project>

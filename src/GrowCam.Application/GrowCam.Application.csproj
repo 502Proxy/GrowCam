@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Use cases and ports. Depends only on the domain. -->
+  <ItemGroup>
+    <ProjectReference Include="..\GrowCam.Domain\GrowCam.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="GrowCam.Tests" />
+  </ItemGroup>
+</Project>
