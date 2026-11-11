@@ -30,6 +30,7 @@ public sealed partial class StartViewModel(AppServices services, INavigator navi
     [ObservableProperty] private bool _hasFindings;
     [ObservableProperty] private Bitmap? _photo;
     [ObservableProperty] private string _photoCaption = "Noch kein Foto";
+    [ObservableProperty] private string _note = "";
 
     public ObservableCollection<FindingItem> Findings { get; } = [];
 
@@ -95,10 +96,26 @@ public sealed partial class StartViewModel(AppServices services, INavigator navi
     [RelayCommand]
     private Task Analyze() => RunAsync(async () =>
     {
-        await Services.Monitoring.AnalyzeNowAsync();
+        await Services.Monitoring.AnalyzeNowAsync(Note);
+        Note = "";
         Refresh();
         Navigator.RefreshHeader();
     }, "Die KI schaut sich die Pflanzen an … bitte warten", "Die KI hat sich die Pflanzen angesehen.");
+
+    [RelayCommand]
+    private Task AnalyzeOwnPhoto() => RunAsync(async () =>
+    {
+        var file = await Navigator.PickPhotoAsync();
+        if (file is null)
+            return; // cancelled
+        BusyText = "Die KI schaut sich dein Foto an … bitte warten";
+        var jpeg = await Task.Run(() => PhotoImport.ToJpeg(file));
+        await Services.Monitoring.AnalyzeUploadedPhotoAsync(jpeg, Note);
+        Note = "";
+        Refresh();
+        Navigator.RefreshHeader();
+        Navigator.Notify("Die KI hat sich dein Foto angesehen.");
+    }, "Foto auswählen …");
 
     [RelayCommand]
     private Task TakePhoto() => RunAsync(async () =>

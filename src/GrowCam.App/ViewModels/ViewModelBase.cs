@@ -22,6 +22,9 @@ public interface INavigator
     void ShowArchivedGrow(long growId);
     void Notify(string message, bool isError = false);
 
+    /// <summary>Lets the user choose a photo file. Returns its bytes, or null if cancelled.</summary>
+    Task<byte[]?> PickPhotoAsync();
+
     /// <summary>Called after data changed that is shown in the header.</summary>
     void RefreshHeader();
 }

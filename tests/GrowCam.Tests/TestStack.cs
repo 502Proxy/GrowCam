@@ -16,11 +16,13 @@ public sealed class FakeAnalyzer : IPlantAnalyzer
 {
     public MilestoneType? Suggest { get; set; }
     public List<GrowContext> Contexts { get; } = [];
+    public List<bool> HadPreviousImage { get; } = [];
     public int ReportImageCount { get; private set; }
 
     public Task<AnalysisResult> AnalyzeAsync(byte[] image, byte[]? previousImage, GrowContext context, CancellationToken ct = default)
     {
         Contexts.Add(context);
+        HadPreviousImage.Add(previousImage is not null);
         // Out-of-range score and too many findings on purpose: the service must clamp/trim.
         var findings = Enumerable.Range(0, 5).Select(i => new Finding(Severity.Ok, $"Befund {i}", "nichts")).ToList();
         return Task.FromResult(new AnalysisResult(150, "Alles gut", findings, Suggest, "gesehen"));

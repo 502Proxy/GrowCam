@@ -78,6 +78,9 @@ public sealed class ConfiguredAi : IPlantAnalyzer, ISeedCatalog
     public Task<IReadOnlyList<SeedInfo>> SearchAsync(string query, CancellationToken ct = default) =>
         _current.Catalog.SearchAsync(query, ct);
 
+    private static string Model(string configured, string fallback) =>
+        string.IsNullOrWhiteSpace(configured) ? fallback : configured.Trim();
+
     private (IPlantAnalyzer, ISeedCatalog) Build(AppSettings s)
     {
         if (s.IsDemoAi)
@@ -85,7 +88,12 @@ public sealed class ConfiguredAi : IPlantAnalyzer, ISeedCatalog
             var demo = new DemoAi();
             return (demo, demo);
         }
-        var client = new ClaudeClient(_http, s.AnthropicApiKey.Trim(), s.AnthropicModel);
-        return (new ClaudePlantAnalyzer(client), new ClaudeSeedCatalog(client));
+        if (s.AiProvider == AiProvider.OpenAi)
+        {
+            var openAi = new OpenAiClient(_http, s.OpenAiApiKey.Trim(), Model(s.OpenAiModel, AppSettings.DefaultOpenAiModel));
+            return (new OpenAiPlantAnalyzer(openAi), new OpenAiSeedCatalog(openAi));
+        }
+        var claude = new ClaudeClient(_http, s.AnthropicApiKey.Trim(), Model(s.AnthropicModel, AppSettings.DefaultAnthropicModel));
+        return (new ClaudePlantAnalyzer(claude), new ClaudeSeedCatalog(claude));
     }
 }

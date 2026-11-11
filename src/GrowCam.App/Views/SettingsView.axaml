@@ -52,15 +52,35 @@
     <!-- AI -->
     <Border Classes="panel">
       <StackPanel Spacing="14">
-        <TextBlock Classes="h2" Text="KI (Claude)" />
-        <TextBlock Classes="muted small" Text="Leer lassen für Beispiel-Antworten. Den Schlüssel gibt es auf platform.claude.com." />
-        <StackPanel>
-          <TextBlock Classes="label" Text="API-Schlüssel" />
-          <TextBox Text="{Binding ApiKey}" PasswordChar="•" />
+        <TextBlock Classes="h2" Text="KI" />
+        <TextBlock Classes="muted small" Text="Welche KI soll die Pflanzen prüfen? Ohne Schlüssel gibt es Beispiel-Antworten." />
+        <StackPanel Orientation="Horizontal" Spacing="24">
+          <RadioButton Content="ChatGPT (OpenAI)" IsChecked="{Binding UseOpenAi}" />
+          <RadioButton Content="Claude" IsChecked="{Binding UseClaude}" />
         </StackPanel>
-        <StackPanel>
-          <TextBlock Classes="label" Text="Modell" />
-          <TextBox Text="{Binding Model}" />
+
+        <StackPanel Spacing="14" IsVisible="{Binding UseOpenAi}">
+          <TextBlock Classes="muted small" Text="Den Schlüssel gibt es auf platform.openai.com (API keys)." />
+          <StackPanel>
+            <TextBlock Classes="label" Text="API-Schlüssel (OpenAI)" />
+            <TextBox Text="{Binding OpenAiKey}" PasswordChar="•" Watermark="sk-…" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="Modell" />
+            <TextBox Text="{Binding OpenAiModel}" Watermark="gpt-5-mini" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="14" IsVisible="{Binding UseClaude}">
+          <TextBlock Classes="muted small" Text="Den Schlüssel gibt es auf platform.claude.com." />
+          <StackPanel>
+            <TextBlock Classes="label" Text="API-Schlüssel (Claude)" />
+            <TextBox Text="{Binding ApiKey}" PasswordChar="•" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="Modell" />
+            <TextBox Text="{Binding Model}" Watermark="claude-sonnet-5-5" />
+          </StackPanel>
         </StackPanel>
       </StackPanel>
     </Border>

@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GrowCam.App.Services;
+using GrowCam.Application;
 using GrowCam.Infrastructure;
 
 namespace GrowCam.App.ViewModels;
@@ -14,6 +15,11 @@ public sealed partial class SettingsViewModel : PageViewModel
     [ObservableProperty] private string _cameraUser = "";
     [ObservableProperty] private string _cameraPassword = "";
     [ObservableProperty] private string _ffmpegPath = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UseClaude))]
+    private bool _useOpenAi;
+    [ObservableProperty] private string _openAiKey = "";
+    [ObservableProperty] private string _openAiModel = "";
     [ObservableProperty] private string _apiKey = "";
     [ObservableProperty] private string _model = "";
     [ObservableProperty] private string _analysisTime = "";
@@ -34,6 +40,9 @@ public sealed partial class SettingsViewModel : PageViewModel
         _cameraUser = s.CameraUser;
         _cameraPassword = s.CameraPassword;
         _ffmpegPath = s.FfmpegPath;
+        _useOpenAi = s.AiProvider == AiProvider.OpenAi;
+        _openAiKey = s.OpenAiApiKey;
+        _openAiModel = s.OpenAiModel;
         _apiKey = s.AnthropicApiKey;
         _model = s.AnthropicModel;
         _analysisTime = s.AnalysisTime.ToString("HH:mm", CultureInfo.InvariantCulture);
@@ -44,6 +53,12 @@ public sealed partial class SettingsViewModel : PageViewModel
         _updateToken = s.UpdateToken;
         _autoInstall = s.AutoInstallUpdates;
         _startWithWindows = Autostart.IsEnabled();
+    }
+
+    public bool UseClaude
+    {
+        get => !UseOpenAi;
+        set => UseOpenAi = !value;
     }
 
     public string Version => Services.Updater.CurrentVersion;
@@ -68,8 +83,11 @@ public sealed partial class SettingsViewModel : PageViewModel
                 CameraUser = CameraUser.Trim(),
                 CameraPassword = CameraPassword,
                 FfmpegPath = FfmpegPath.Trim(),
+                AiProvider = UseOpenAi ? AiProvider.OpenAi : AiProvider.Claude,
+                OpenAiApiKey = OpenAiKey.Trim(),
+                OpenAiModel = string.IsNullOrWhiteSpace(OpenAiModel) ? AppSettings.DefaultOpenAiModel : OpenAiModel.Trim(),
                 AnthropicApiKey = ApiKey.Trim(),
-                AnthropicModel = string.IsNullOrWhiteSpace(Model) ? "claude-sonnet-5-5" : Model.Trim(),
+                AnthropicModel = string.IsNullOrWhiteSpace(Model) ? AppSettings.DefaultAnthropicModel : Model.Trim(),
                 AnalysisTime = analysis,
                 ReportTime = report,
                 SnapshotIntervalMinutes = (int)(SnapshotInterval ?? 0),
