@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GrowCam.App.Services;
+using GrowCam.Application;
 using GrowCam.Domain;
 
 namespace GrowCam.App.ViewModels;
@@ -125,9 +126,12 @@ public sealed partial class MainViewModel : ViewModelBase, INavigator
 
     public async Task<byte[]?> PickPhotoAsync()
     {
-        var window = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
-        if (TopLevel.GetTopLevel(window)?.StorageProvider is not { CanOpen: true } storage)
-            return null;
+        var desktop = Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+        var window = desktop?.MainWindow
+                     ?? desktop?.Windows.FirstOrDefault(w => w.IsActive)
+                     ?? desktop?.Windows.FirstOrDefault(w => w.IsVisible);
+        if (window?.StorageProvider is not { CanOpen: true } storage)
+            throw new UserFacingException("Die Dateiauswahl lässt sich gerade nicht öffnen. Bitte GrowCam neu starten.");
 
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
