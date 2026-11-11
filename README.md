@@ -1,7 +1,7 @@
 # GrowCam
 
-Desktop app that watches a grow tent with a TP-Link Tapo camera, lets Claude
-check the plants once a day and shows the result in a large-print, high-contrast
+Desktop app that watches a grow tent with a TP-Link Tapo camera, lets an AI
+(ChatGPT or Claude) check the plants once a day and shows the result in a large-print, high-contrast
 window – built to be easy to read and use for someone with poor eyesight.
 
 Developed and tested on macOS, deployed on Windows as a normal installed program
@@ -10,6 +10,8 @@ Developed and tested on macOS, deployed on Windows as a normal installed program
 **Features**
 
 - Daily AI check (deficiencies, pests, mould, stress) with plain-language advice
+- Check your own photo: upload a close-up (e.g. one leaf) and ask the AI a question about it
+- Choice of AI: ChatGPT (OpenAI) or Claude
 - Grow diary: milestones (sprouted, vegetative, flowering) are detected by the AI and confirmed with one tap
 - New-grow wizard with automatic strain lookup on the web
 - Camera control: pan/tilt, saved views, fixed "analysis view" (ONVIF)
@@ -59,7 +61,9 @@ updates itself.
 2. In GrowCam → **Einstellungen**:
    - **Kamera**: IP of the camera (give it a fixed IP in the router) and the
      *camera account* from the Tapo app (Camera settings → Advanced → Camera account).
-   - **KI**: API key from <https://platform.claude.com>.
+   - **KI**: choose *ChatGPT (OpenAI)* and enter an API key from
+     <https://platform.openai.com> (default model `gpt-5-mini`), or choose *Claude*
+     with a key from <https://platform.claude.com>.
    - **GitHub-Zugang**: a fine-grained personal access token with *read-only*
      access to *Contents* of this repo (needed because the repo is private).
    - Tick **"GrowCam mit Windows starten"**, then **Speichern**.
@@ -82,7 +86,8 @@ src/
                           SeedService, ScheduleService
   GrowCam.Infrastructure  adapters: SQLite (Microsoft.Data.Sqlite), file image store,
                           Tapo camera (ffmpeg for RTSP snapshots + ONVIF for pan/tilt),
-                          Claude via HttpClient, demo fakes, JSON settings, autostart
+                          OpenAI (Responses API) or Claude via HttpClient, demo fakes,
+                          JSON settings, autostart
   GrowCam.App             Avalonia UI (MVVM with CommunityToolkit.Mvvm), tray icon,
                           composition root, background scheduler, Velopack updater
 tests/GrowCam.Tests       xUnit tests for domain, services and AI adapters
@@ -101,6 +106,7 @@ Microsoft.Data.Sqlite, Velopack. No ORM, no AI SDK, no DI container.
 |---|---|---|
 | Plant check | daily at the configured time + on demand | today's photo + previous check photo |
 | Weekly report | Sundays at the configured time | one photo per day |
+| Own photo | "Eigenes Foto prüfen lassen" on the start page | the chosen photo (not compared, not used in reports) |
 | Strain lookup | new-grow wizard | web search (cached per strain) |
 
 Results come back as JSON via forced tool calls, so nothing depends on parsing

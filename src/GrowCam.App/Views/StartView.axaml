@@ -22,10 +22,16 @@
         <StackPanel Spacing="12">
           <TextBlock FontSize="28" FontWeight="Bold" Foreground="{Binding StatusForeground}" Text="{Binding StatusHeadline}" />
           <TextBlock Foreground="{Binding StatusForeground}" Text="{Binding StatusText}" />
-          <StackPanel Orientation="Horizontal" Spacing="16">
-            <Button Classes="light" Content="Pflanzen jetzt prüfen" Command="{Binding AnalyzeCommand}" IsEnabled="{Binding !IsBusy}" />
-            <TextBlock Foreground="{Binding StatusForeground}" FontWeight="Bold" VerticalAlignment="Center" Text="{Binding BusyText}" />
+          <StackPanel Spacing="4">
+            <TextBlock Foreground="{Binding StatusForeground}" FontWeight="Bold" Text="Frage oder Hinweis an die KI (freiwillig)" />
+            <TextBox Text="{Binding Note}" MaxWidth="720" HorizontalAlignment="Left" Width="720"
+                     Watermark="z. B. Was sind die braunen Flecken auf diesem Blatt?" />
           </StackPanel>
+          <WrapPanel Orientation="Horizontal">
+            <Button Classes="light" Margin="0,0,16,10" Content="Pflanzen jetzt prüfen" Command="{Binding AnalyzeCommand}" IsEnabled="{Binding !IsBusy}" />
+            <Button Classes="light" Margin="0,0,16,10" Content="Eigenes Foto prüfen lassen" Command="{Binding AnalyzeOwnPhotoCommand}" IsEnabled="{Binding !IsBusy}" />
+            <TextBlock Foreground="{Binding StatusForeground}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,0,10" Text="{Binding BusyText}" />
+          </WrapPanel>
         </StackPanel>
       </Border>
 

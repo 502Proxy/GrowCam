@@ -153,34 +153,63 @@ public sealed class MonitoringService(
                 await Task.Delay(_settleTime, ct); // let the motor stop before capturing
 
             var snapshot = await CaptureAsync(grow, scheduled: true, ct);
-            var image = images.Load(snapshot.Path);
-
             var previous = analyses.Latest(grow.Id);
+
+            // Compare only with an earlier camera photo – an uploaded close-up shows something else.
             byte[]? previousImage = null;
-            if (previous is not null && snapshots.Get(previous.SnapshotId) is { } previousSnapshot)
+            if (previous is not null && snapshots.Get(previous.SnapshotId) is { Scheduled: true } previousSnapshot)
                 previousImage = images.Load(previousSnapshot.Path);
 
             var context = ContextBuilder.Build(grow, clock.Now, diary.Recent(grow.Id, 10), previous?.Headline ?? "", userNote);
-            var result = await analyzer.AnalyzeAsync(image, previousImage, context, ct);
-
-            var analysis = analyses.Add(new Analysis(
-                0,
-                grow.Id,
-                snapshot.Id,
-                clock.Now,
-                Math.Clamp(result.HealthScore, 0, 100),
-                result.Headline,
-                result.Findings.Take(3).ToList(),
-                result.SuggestedMilestone,
-                result.MilestoneNote));
-
-            ApplyMilestoneSuggestion(grow, analysis);
-            return analysis;
+            return await AnalyzeAndStoreAsync(grow, snapshot, previousImage, context, ct);
         }
         finally
         {
             _gate.Release();
         }
+    }
+
+    /// <summary>
+    /// Lets the AI assess a photo the grower took themselves (e.g. a close-up of one leaf).
+    /// It is stored with the grow but never used for the weekly report or as comparison photo.
+    /// </summary>
+    public async Task<Analysis> AnalyzeUploadedPhotoAsync(byte[] jpeg, string userNote = "", CancellationToken ct = default)
+    {
+        var grow = grows.Active() ?? throw new NoActiveGrowException();
+        if (jpeg.Length == 0)
+            throw new UserFacingException("Das Foto ist leer.");
+        await _gate.WaitAsync(ct);
+        try
+        {
+            var takenAt = clock.Now;
+            var snapshot = snapshots.Add(new Snapshot(0, grow.Id, takenAt, images.Save(grow.Id, takenAt, jpeg), Scheduled: false));
+            var previous = analyses.Latest(grow.Id);
+            var context = ContextBuilder.Build(grow, takenAt, diary.Recent(grow.Id, 10), previous?.Headline ?? "", userNote)
+                with { IsUploadedPhoto = true };
+            return await AnalyzeAndStoreAsync(grow, snapshot, null, context, ct);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    private async Task<Analysis> AnalyzeAndStoreAsync(Grow grow, Snapshot snapshot, byte[]? previousImage, GrowContext context, CancellationToken ct)
+    {
+        var result = await analyzer.AnalyzeAsync(images.Load(snapshot.Path), previousImage, context, ct);
+        var analysis = analyses.Add(new Analysis(
+            0,
+            grow.Id,
+            snapshot.Id,
+            clock.Now,
+            Math.Clamp(result.HealthScore, 0, 100),
+            result.Headline,
+            result.Findings.Take(3).ToList(),
+            result.SuggestedMilestone,
+            result.MilestoneNote));
+
+        ApplyMilestoneSuggestion(grow, analysis);
+        return analysis;
     }
 
     public Analysis? LatestAnalysis(long growId) => analyses.Latest(growId);

@@ -9,9 +9,12 @@ public sealed record AppSettings
     public string CameraPassword { get; init; } = "";
     public string FfmpegPath { get; init; } = "";
 
-    // AI – empty key means demo answers.
+    // AI – empty key of the chosen provider means demo answers.
+    public AiProvider AiProvider { get; init; } = AiProvider.OpenAi;
+    public string OpenAiApiKey { get; init; } = "";
+    public string OpenAiModel { get; init; } = DefaultOpenAiModel;
     public string AnthropicApiKey { get; init; } = "";
-    public string AnthropicModel { get; init; } = "claude-sonnet-5-5";
+    public string AnthropicModel { get; init; } = DefaultAnthropicModel;
 
     // Schedule
     public TimeOnly AnalysisTime { get; init; } = new(12, 0);
@@ -29,12 +32,23 @@ public sealed record AppSettings
     public double FontScale { get; init; } = 1.0;
 
     public bool IsDemoCamera => string.IsNullOrWhiteSpace(CameraHost);
-    public bool IsDemoAi => string.IsNullOrWhiteSpace(AnthropicApiKey);
+    public bool IsDemoAi => string.IsNullOrWhiteSpace(AiProvider == AiProvider.OpenAi ? OpenAiApiKey : AnthropicApiKey);
+
+    public const string DefaultOpenAiModel = "gpt-5-mini";
+    public const string DefaultAnthropicModel = "claude-sonnet-5-5";
 
     public bool IsLightOn(TimeOnly now) =>
         LightOn <= LightOff
             ? now >= LightOn && now < LightOff
             : now >= LightOn || now < LightOff; // schedule crosses midnight
+}
+
+/// <summary>Which AI service answers. Stored by name in settings.json.</summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AiProvider>))]
+public enum AiProvider
+{
+    OpenAi,
+    Claude,
 }
 
 public interface ISettingsStore

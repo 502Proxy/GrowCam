@@ -122,6 +122,29 @@ internal static class Prompts
         return string.Join("\n", lines);
     }
 
+    public static string AnalysisRequest(GrowContext c, bool hasPrevious)
+    {
+        var text = Describe(c);
+        if (c.IsUploadedPhoto)
+            text += "\n\nThe grower took this photo by hand and uploaded it, maybe as a close-up of a single leaf, "
+                    + "bud or spot. Judge what you see in this photo; do not assume it shows the whole tent. "
+                    + "If the grower asked something, answer it in the headline or a finding.";
+        text += "\n\nLook for deficiencies, pests, mould, light/heat stress, over- or underwatering"
+                + (hasPrevious ? ", and compare with the previous photo." : ".")
+                + " Then call report_analysis.";
+        return text;
+    }
+
+    public static string ReportRequest(GrowContext c, IReadOnlyList<string> analyses) =>
+        Describe(c)
+        + "\nDaily assessments this week: " + (analyses.Count > 0 ? string.Join(" | ", analyses) : "none")
+        + "\n\nSummarize the week for the grower and call report_week.";
+
+    public static string SeedRequest(string query) =>
+        $"Find grow data for the cannabis seed strain '{query}' (indoor grow tent). "
+        + "Search the web (breeder or seed shop pages), then call report_seeds with up to three "
+        + "matching strains. Write height, light schedule and difficulty in short German.";
+
     public static JsonNode Tool(string json) => JsonNode.Parse(json)!;
 
     public static JsonObject ForceTool(string name) => new() { ["type"] = "tool", ["name"] = name };
@@ -137,11 +160,9 @@ public sealed class ClaudePlantAnalyzer(ClaudeClient client) : IPlantAnalyzer
             content.Add(ClaudeClient.TextBlock("Photo from the previous check:"));
             content.Add(ClaudeClient.ImageBlock(previousImage));
         }
-        content.Add(ClaudeClient.TextBlock("Photo from now:"));
+        content.Add(ClaudeClient.TextBlock(context.IsUploadedPhoto ? "Photo from the grower:" : "Photo from now:"));
         content.Add(ClaudeClient.ImageBlock(image));
-        content.Add(ClaudeClient.TextBlock(Prompts.Describe(context)
-            + "\n\nLook for deficiencies, pests, mould, light/heat stress, over- or underwatering, "
-            + "and compare with the previous photo if there is one. Then call report_analysis."));
+        content.Add(ClaudeClient.TextBlock(Prompts.AnalysisRequest(context, previousImage is not null)));
 
         var response = await client.CreateAsync(new JsonObject
         {
@@ -165,9 +186,7 @@ public sealed class ClaudePlantAnalyzer(ClaudeClient client) : IPlantAnalyzer
             content.Add(ClaudeClient.TextBlock($"Day {i + 1}:"));
             content.Add(ClaudeClient.ImageBlock(images[i]));
         }
-        content.Add(ClaudeClient.TextBlock(Prompts.Describe(context)
-            + "\nDaily assessments this week: " + (analyses.Count > 0 ? string.Join(" | ", analyses) : "none")
-            + "\n\nSummarize the week for the grower and call report_week."));
+        content.Add(ClaudeClient.TextBlock(Prompts.ReportRequest(context, analyses)));
 
         var response = await client.CreateAsync(new JsonObject
         {
@@ -180,11 +199,7 @@ public sealed class ClaudePlantAnalyzer(ClaudeClient client) : IPlantAnalyzer
 
         var input = ClaudeClient.ToolInput(response, "report_week")
                     ?? throw new AnalyzerException("Die KI hat keinen Wochenbericht geliefert.");
-        return new ReportDraft(
-            Parsing.Str(input, "headline"),
-            Parsing.StrList(input, "happened"),
-            Parsing.StrList(input, "next_steps"),
-            input["needs_attention"]?.GetValueKind() == System.Text.Json.JsonValueKind.True);
+        return Parsing.Report(input);
     }
 }
 
@@ -198,9 +213,7 @@ public sealed class ClaudeSeedCatalog(ClaudeClient client) : ISeedCatalog
         var messages = new JsonArray(new JsonObject
         {
             ["role"] = "user",
-            ["content"] = $"Find grow data for the cannabis seed strain '{query}' (indoor grow tent). "
-                          + "Search the web (breeder or seed shop pages), then call report_seeds with up to three "
-                          + "matching strains. Write height, light schedule and difficulty in short German.",
+            ["content"] = Prompts.SeedRequest(query),
         });
         JsonObject toolChoice = new() { ["type"] = "auto" };
 
@@ -218,13 +231,7 @@ public sealed class ClaudeSeedCatalog(ClaudeClient client) : ISeedCatalog
             }, ct);
 
             if (ClaudeClient.ToolInput(response, "report_seeds") is { } input)
-            {
-                return (input["seeds"]?.AsArray() ?? new JsonArray())
-                    .OfType<JsonObject>()
-                    .Select(Parsing.Seed)
-                    .Where(s => s.Name.Length > 0)
-                    .ToList();
-            }
+                return Parsing.Seeds(input);
 
             // A paused server-side search continues by sending the turn back unchanged;
             // a plain text answer gets a nudge to call the tool.
@@ -256,6 +263,19 @@ public static class Parsing
             ParseMilestone(Str(input, "suggested_milestone")),
             Str(input, "milestone_note"));
     }
+
+    public static ReportDraft Report(JsonObject input) => new(
+        Str(input, "headline"),
+        StrList(input, "happened"),
+        StrList(input, "next_steps"),
+        input["needs_attention"]?.GetValueKind() == System.Text.Json.JsonValueKind.True);
+
+    public static IReadOnlyList<SeedInfo> Seeds(JsonObject input) =>
+        (input["seeds"]?.AsArray() ?? new JsonArray())
+            .OfType<JsonObject>()
+            .Select(Seed)
+            .Where(s => s.Name.Length > 0)
+            .ToList();
 
     public static SeedInfo Seed(JsonObject s) => new(
         Str(s, "name"),

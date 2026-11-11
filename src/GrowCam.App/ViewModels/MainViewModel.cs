@@ -1,4 +1,7 @@
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -118,6 +121,27 @@ public sealed partial class MainViewModel : ViewModelBase, INavigator
         Message = message;
         _messageTimer.Stop();
         _messageTimer.Start();
+    }
+
+    public async Task<byte[]?> PickPhotoAsync()
+    {
+        var window = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        if (TopLevel.GetTopLevel(window)?.StorageProvider is not { CanOpen: true } storage)
+            return null;
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Foto auswählen",
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("Fotos") { Patterns = PhotoImport.Patterns }],
+        });
+        if (files.Count == 0)
+            return null;
+
+        await using var stream = await files[0].OpenReadAsync();
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+        return buffer.ToArray();
     }
 
     public void RefreshHeader()

@@ -185,6 +185,10 @@
       <Setter Property="FontSize" Value="20" />
       <Setter Property="MinHeight" Value="52" />
     </Style>
+    <Style Selector="RadioButton">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="MinHeight" Value="52" />
+    </Style>
   </Application.Styles>
 
   <TrayIcon.Icons>

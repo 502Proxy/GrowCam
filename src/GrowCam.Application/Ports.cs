@@ -15,7 +15,8 @@ public sealed record GrowContext(
     IReadOnlyList<MilestoneType> OpenMilestones,
     IReadOnlyList<string> RecentDiary,
     string PreviousHeadline = "",
-    string UserNote = "");
+    string UserNote = "",
+    bool IsUploadedPhoto = false);
 
 public sealed record AnalysisResult(
     int HealthScore,
